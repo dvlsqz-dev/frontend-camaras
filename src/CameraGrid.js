@@ -95,8 +95,8 @@ export default function CameraGrid({ onSelectCamera }) {
      ============================================================ */
   return (
     <>
-      <h1>Título de la aplicación</h1>
-      <p>Descripción de la aplicación</p>
+      <h1>Proyectos Municipales</h1>
+      <p>Seleccione una cámara para ver su transmisión en vivo.</p>
 
       <div className="camera-grid">
         {cameras.map((cam) => (
@@ -149,7 +149,7 @@ export default function CameraGrid({ onSelectCamera }) {
       </div>
 
       {showShare && (
-        <ShareModal url={shareUrl} onClose={() => setShowShare(false)} />
+        <ShareModal open={showShare} url={shareUrl} onClose={() => setShowShare(false)} />
       )}
     </>
   );
