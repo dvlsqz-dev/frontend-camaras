@@ -1,6 +1,6 @@
 const proyectos = {
   "BE3883609": {
-    titulo: "ESQUIPULAS PG",
+    titulo: "ESQUIPULAS PALO GORDO",
     descripcion:
       "MEJORAMIENTO CAMINO RURAL",
   },
