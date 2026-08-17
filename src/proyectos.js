@@ -1,8 +1,8 @@
 const proyectos = {
   "BE3883609": {
-    titulo: "ESQUIPULAS PALO GORDO",
+    titulo: "MEJORAMIENTO CAMINO RURAL, SECTOR EL CAMPO CASERIO SAN ISIDRO, ALDEA SAN FRANCISCO, EL RODEO SM",
     descripcion:
-      "MEJORAMIENTO CAMINO RURAL",
+      "MEJORAMIENTO CAMINO RURAL, SECTOR EL CAMPO CASERIO SAN ISIDRO, ALDEA SAN FRANCISCO, EL RODEO SM",
   },
   "BD3569899": {
     titulo: "Aldea Villa Hermosa, Esquipulas Palo Gordo, San Marcos",
