@@ -2,13 +2,14 @@ import { useEffect } from "react";
 import EZUIKit from "ezuikit-js";
 import "./Player.css";
 import { FaArrowLeft } from "react-icons/fa";
+import { API_URL } from "./config";
 
 export default function Player({ camera, onBack }) {
   useEffect(() => {
     let player = null;
 
     async function start() {
-      const r = await fetch("https://backend-camaras-d6gk.onrender.com/token");
+      const r = await fetch(`${API_URL}/token`);
       const data = await r.json();
       const token = data.data.accessToken;
 

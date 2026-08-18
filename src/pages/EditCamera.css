@@ -1,0 +1,147 @@
+.edit-container {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.edit-back {
+  display: inline-flex;
+  align-items: center;
+  background: #334155;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.25s ease;
+}
+
+.edit-back:hover {
+  background: #475569;
+}
+
+.edit-title {
+  font-size: 26px;
+  text-align: center;
+  margin-top: 8px;
+  margin-bottom: 6px;
+}
+
+.edit-subtitle {
+  text-align: center;
+  font-size: 14px;
+  opacity: 0.8;
+  margin-top: 0;
+  margin-bottom: 24px;
+}
+
+.edit-card {
+  background: rgba(28, 31, 59, 0.78);
+  backdrop-filter: blur(6px);
+  padding: 22px 24px;
+  border-radius: 18px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.32);
+}
+
+.edit-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.85;
+  margin: 16px 0 6px;
+}
+
+.edit-select,
+.edit-input,
+.edit-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  font-size: 14px;
+  border-radius: 10px;
+  border: 1px solid #3f4768;
+  background: #14193d;
+  color: white;
+  outline: none;
+}
+
+.edit-select:focus,
+.edit-input:focus,
+.edit-textarea:focus {
+  border-color: #3b82f6;
+}
+
+.edit-textarea {
+  resize: vertical;
+}
+
+.edit-original {
+  font-size: 12px;
+  opacity: 0.55;
+  margin-top: 10px;
+  word-break: break-word;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.edit-save,
+.edit-reset,
+.edit-retry {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+
+.edit-save {
+  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+}
+
+.edit-save:hover {
+  background: linear-gradient(135deg, #2563eb, #60a5fa);
+  transform: scale(1.02);
+}
+
+.edit-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.edit-reset {
+  background: #334155;
+}
+
+.edit-reset:hover {
+  background: #475569;
+  transform: scale(1.02);
+}
+
+.edit-retry {
+  background: #f87171;
+  margin-top: 12px;
+}
+
+.edit-msg {
+  margin-top: 14px;
+  font-size: 14px;
+}
+
+.edit-ok {
+  color: #4ade80;
+}
+
+.edit-error {
+  color: #f87171;
+}

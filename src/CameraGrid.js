@@ -1,51 +1,39 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./CameraGrid.css";
-import { FaCamera } from "react-icons/fa";
+import { FaCamera, FaCog } from "react-icons/fa";
 import ShareModal from "./components/ShareModal";
 import proyectos from "./proyectos";
-
+import { API_URL } from "./config";
 
 export default function CameraGrid({ onSelectCamera }) {
+  const navigate = useNavigate();
   const [cameras, setCameras] = useState([]);
+  const [proyectosData, setProyectosData] = useState({});
   const [loading, setLoading] = useState(true);
-  const [editCam, setEditCam] = useState(null);
-  const [newName, setNewName] = useState("");
-  const [newDesc, setNewDesc] = useState("");
 
   // Modal para compartir
   const [showShare, setShowShare] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
 
   /* ============================================================
-      Cargar cámaras + aplicar diccionario + aplicar localStorage
+      Cargar cámaras + información guardada en el backend
      ============================================================ */
-  // https://camaras-react-node-1.onrender.com
-  // https://localhost:3000
   useEffect(() => {
     async function load() {
       try {
-        const r = await fetch("https://backend-camaras-d6gk.onrender.com/cameras");
-        const data = await r.json();
+        const [camRes, proyRes] = await Promise.all([
+          fetch(`${API_URL}/cameras`),
+          fetch(`${API_URL}/proyectos`),
+        ]);
 
-        const cams = data.map((cam) => {
-          const info = proyectos[cam.serial];
-          const saved = JSON.parse(localStorage.getItem(cam.serial));
+        const camData = await camRes.json();
+        const proyData = await proyRes.json();
 
-          if (info) {
-            return {
-              ...cam,
-              name: saved?.name || info.titulo,
-              desc: saved?.desc || info.descripcion,
-            };
-          }
+        const cams = Array.isArray(camData) ? camData : [];
+        const proys = proyData || {};
 
-          return {
-            ...cam,
-            name: saved?.name || cam.name || "Sin nombre",
-            desc: saved?.desc || cam.desc || "",
-          };
-        });
-
+        setProyectosData(proys);
         setCameras(cams);
       } catch (err) {
         console.error(" Error cargando cámaras:", err);
@@ -59,29 +47,6 @@ export default function CameraGrid({ onSelectCamera }) {
   }, []);
 
   /* ============================================================
-      Guardar edición local
-     ============================================================ */
-  const guardarDatos = () => {
-    localStorage.setItem(
-      editCam.serial,
-      JSON.stringify({
-        name: newName,
-        desc: newDesc,
-      })
-    );
-
-    setCameras((prev) =>
-      prev.map((c) =>
-        c.serial === editCam.serial
-          ? { ...c, name: newName, desc: newDesc }
-          : c
-      )
-    );
-
-    setEditCam(null);
-  };
-
-  /* ============================================================
       Mostrar loading
      ============================================================ */
   if (loading)
@@ -89,6 +54,14 @@ export default function CameraGrid({ onSelectCamera }) {
 
   if (!cameras.length)
     return <p style={{ color: "white" }}>No hay cámaras disponibles</p>;
+
+  const getInfo = (cam) => {
+    const info = proyectosData[cam.serial] || proyectos[cam.serial];
+    return {
+      name: info?.titulo || info?.name || cam.name || "Sin nombre",
+      desc: info?.descripcion || info?.desc || cam.desc || "",
+    };
+  };
 
   /* ============================================================
       Render
@@ -98,54 +71,66 @@ export default function CameraGrid({ onSelectCamera }) {
       <h1>Proyectos Municipales</h1>
       <p>Seleccione una cámara para ver su transmisión en vivo.</p>
 
+      <button
+        className="camera-edit"
+        style={{ maxWidth: 320, margin: "0 auto 10px", display: "block" }}
+        onClick={() => navigate("/editar")}
+      >
+        <FaCog style={{ marginRight: "6px" }} />
+        Editar nombres y descripciones
+      </button>
+
       <div className="camera-grid">
-        {cameras.map((cam) => (
-          <div className="camera-card" key={cam.serial}>
-            <h3 className="camera-title">{cam.name}</h3>
+        {cameras.map((cam) => {
+          const { name, desc } = getInfo(cam);
+          return (
+            <div className="camera-card" key={cam.serial}>
+              <h3 className="camera-title">{name}</h3>
 
-            {cam.desc && (
-              <p style={{ opacity: 0.7, marginTop: "-10px" }}>{cam.desc}</p>
-            )}
+              {desc && (
+                <p style={{ opacity: 0.7, marginTop: "-10px" }}>{desc}</p>
+              )}
 
-            <p>
-              Estado de la cámara:{" "}
-              <span
-                className={cam.online ? "status-online" : "status-offline"}
+              <p>
+                Estado de la cámara:{" "}
+                <span
+                  className={cam.online ? "status-online" : "status-offline"}
+                >
+                  {cam.online ? "Online" : "Offline"}
+                </span>
+              </p>
+
+              <p className="camera-serial">Serial de la cámara: {cam.serial}</p>
+
+              <button
+                className="camera-button"
+                onClick={() =>
+                  onSelectCamera({
+                    serial: cam.serial,
+                    name,
+                    desc,
+                  })
+                }
               >
-                {cam.online ? "Online" : "Offline"}
-              </span>
-            </p>
+                <FaCamera style={{ marginRight: "6px" }} />
+                Ver camara con descripción única
+              </button>
 
-            <p className="camera-serial">Serial de la cámara: {cam.serial}</p>
-
-            <button
-              className="camera-button"
-              onClick={() =>
-                onSelectCamera({
-                  serial: cam.serial,
-                  name: cam.name,
-                  encrypted: cam.encrypted,
-                })
-              }
-            >
-              <FaCamera style={{ marginRight: "6px" }} />
-              Ver camara con descripción única
-            </button>
-
-            {/* BOTÓN PARA ABRIR MODAL */}
-            <button
-              className="camera-button"
-              style={{ background: "#2563eb", marginTop: "10px" }}
-              onClick={() => {
-                const url = `${window.location.origin}/view/${cam.serial}`;
-                setShareUrl(url);
-                setShowShare(true);
-              }}
-            >
-              🔗 Generar URL para compartir
-            </button>
-          </div>
-        ))}
+              {/* BOTÓN PARA ABRIR MODAL */}
+              <button
+                className="camera-button"
+                style={{ background: "#2563eb", marginTop: "10px" }}
+                onClick={() => {
+                  const url = `${window.location.origin}/view/${cam.serial}`;
+                  setShareUrl(url);
+                  setShowShare(true);
+                }}
+              >
+                🔗 Generar URL para compartir
+              </button>
+            </div>
+          );
+        })}
       </div>
 
       {showShare && (
