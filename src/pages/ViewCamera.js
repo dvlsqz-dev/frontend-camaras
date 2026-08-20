@@ -16,6 +16,7 @@ export default function ViewCamera() {
     async function fetchProyecto() {
       try {
         const r = await fetch(`${API_URL}/proyectos`);
+        if (!r.ok) return;
         const data = await r.json();
         if (!cancelled && data && data[serial]) {
           setProyecto(data[serial]);
@@ -35,8 +36,10 @@ export default function ViewCamera() {
     async function start() {
       try {
         const r = await fetch(`${API_URL}/token`);
+        if (!r.ok) throw new Error(`Error del servidor (código ${r.status})`);
         const data = await r.json();
-        const token = data.data.accessToken;
+        const token = data?.data?.accessToken;
+        if (!token) throw new Error("No se pudo obtener el token de acceso");
 
         const url = `ezopen://open.ezviz.com/${serial}/1.hd.live`;
 

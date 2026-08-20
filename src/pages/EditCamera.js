@@ -28,6 +28,12 @@ export default function EditCamera() {
           fetch(`${API_URL}/proyectos`),
         ]);
 
+        if (!camRes.ok || !proyRes.ok) {
+          throw new Error(
+            `Error del servidor (código ${camRes.status || proyRes.status})`
+          );
+        }
+
         const cams = await camRes.json();
         const proys = await proyRes.json();
 

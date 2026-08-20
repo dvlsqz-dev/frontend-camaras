@@ -9,21 +9,27 @@ export default function Player({ camera, onBack }) {
     let player = null;
 
     async function start() {
-      const r = await fetch(`${API_URL}/token`);
-      const data = await r.json();
-      const token = data.data.accessToken;
+      try {
+        const r = await fetch(`${API_URL}/token`);
+        if (!r.ok) throw new Error(`Error del servidor (código ${r.status})`);
+        const data = await r.json();
+        const token = data?.data?.accessToken;
+        if (!token) throw new Error("No se pudo obtener el token de acceso");
 
-      const url = `ezopen://open.ezviz.com/${camera.serial}/1.hd.live`;
+        const url = `ezopen://open.ezviz.com/${camera.serial}/1.hd.live`;
 
-      player = new EZUIKit.EZUIKitPlayer({
-        id: "player-ezviz",
-        accessToken: token,
-        url: url,
-        template: "pcLive",
-        audio: 1,
-        language: "en",
-        env: { domain: "https://iusopen.ezvizlife.com" },
-      });
+        player = new EZUIKit.EZUIKitPlayer({
+          id: "player-ezviz",
+          accessToken: token,
+          url: url,
+          template: "pcLive",
+          audio: 1,
+          language: "en",
+          env: { domain: "https://iusopen.ezvizlife.com" },
+        });
+      } catch (err) {
+        console.error("Error cargando cámara:", err);
+      }
     }
 
     start();

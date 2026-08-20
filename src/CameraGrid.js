@@ -11,6 +11,7 @@ export default function CameraGrid({ onSelectCamera }) {
   const [cameras, setCameras] = useState([]);
   const [proyectosData, setProyectosData] = useState({});
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
   // Modal para compartir
   const [showShare, setShowShare] = useState(false);
@@ -20,37 +21,68 @@ export default function CameraGrid({ onSelectCamera }) {
       Cargar cámaras + información guardada en el backend
      ============================================================ */
   useEffect(() => {
-    async function load() {
-      try {
-        const [camRes, proyRes] = await Promise.all([
-          fetch(`${API_URL}/cameras`),
-          fetch(`${API_URL}/proyectos`),
-        ]);
-
-        const camData = await camRes.json();
-        const proyData = await proyRes.json();
-
-        const cams = Array.isArray(camData) ? camData : [];
-        const proys = proyData || {};
-
-        setProyectosData(proys);
-        setCameras(cams);
-      } catch (err) {
-        console.error(" Error cargando cámaras:", err);
-        setCameras([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  async function load() {
+    setLoading(true);
+    setLoadError("");
+    try {
+      const [camRes, proyRes] = await Promise.all([
+        fetch(`${API_URL}/cameras`),
+        fetch(`${API_URL}/proyectos`),
+      ]);
+
+      if (!camRes.ok || !proyRes.ok) {
+        throw new Error(
+          `Error del servidor (código ${camRes.status || proyRes.status})`
+        );
+      }
+
+      const camData = await camRes.json();
+      const proyData = await proyRes.json();
+
+      const cams = Array.isArray(camData) ? camData : [];
+      const proys = proyData || {};
+
+      setProyectosData(proys);
+      setCameras(cams);
+    } catch (err) {
+      console.error(" Error cargando cámaras:", err);
+      setCameras([]);
+      setLoadError(
+        err.message ||
+          "No se pudo conectar con el servidor. Intenta de nuevo en unos segundos."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
 
   /* ============================================================
       Mostrar loading
      ============================================================ */
   if (loading)
     return <p style={{ color: "white" }}>Cargando cámaras...</p>;
+
+  if (loadError)
+    return (
+      <div style={{ color: "white", textAlign: "center", marginTop: 30 }}>
+        <p>{loadError}</p>
+        <p style={{ opacity: 0.8, fontSize: 14 }}>
+          Si el servidor estuvo dormido (plan gratuito), espera unos segundos y
+          vuelve a intentar.
+        </p>
+        <button
+          className="camera-button"
+          style={{ background: "#2563eb", marginTop: 10 }}
+          onClick={load}
+        >
+          Reintentar
+        </button>
+      </div>
+    );
 
   if (!cameras.length)
     return <p style={{ color: "white" }}>No hay cámaras disponibles</p>;
