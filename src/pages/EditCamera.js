@@ -20,6 +20,12 @@ export default function EditCamera() {
   const [status, setStatus] = useState(""); // "" | "saving" | "saved" | "error"
   const [statusMsg, setStatusMsg] = useState("");
 
+  // Bloqueo por PIN
+  const [pin, setPin] = useState("");
+  const [pinStatus, setPinStatus] = useState(""); // "" | "verifying" | "error"
+  const [pinMsg, setPinMsg] = useState("");
+  const [verified, setVerified] = useState(false);
+
   useEffect(() => {
     async function load() {
       try {
@@ -70,6 +76,41 @@ export default function EditCamera() {
     setDescripcion(info?.descripcion || "");
   }
 
+  async function verificarPin() {
+    if (!pin.trim()) {
+      setPinStatus("error");
+      setPinMsg("Ingresa el PIN de administrador.");
+      return;
+    }
+
+    setPinStatus("verifying");
+    setPinMsg("");
+
+    try {
+      const res = await fetch(`${API_URL}/proyectos/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin: pin.trim() }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        let msg = data?.error || "No se pudo verificar el PIN.";
+        if (res.status === 401) msg = "PIN de administrador incorrecto.";
+        setPinStatus("error");
+        setPinMsg(msg);
+        return;
+      }
+
+      setVerified(true);
+    } catch (err) {
+      console.error("Error verificando PIN:", err);
+      setPinStatus("error");
+      setPinMsg("No se pudo conectar con el servidor. Intenta de nuevo.");
+    }
+  }
+
   async function guardar() {
     if (!serial) return;
 
@@ -80,16 +121,21 @@ export default function EditCamera() {
       const res = await fetch(`${API_URL}/proyectos/${serial}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ titulo, descripcion }),
+        body: JSON.stringify({ titulo, descripcion, pin }),
       });
 
       if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+
         if (res.status === 503) {
           throw new Error(
             "El servidor está dormido (modo gratuito). Espera unos 30 segundos y vuelve a intentar."
           );
         }
-        throw new Error("Error del servidor al guardar.");
+        if (res.status === 401) {
+          throw new Error("PIN de administrador incorrecto.");
+        }
+        throw new Error(data?.error || "Error del servidor al guardar.");
       }
 
       setProyectosData((prev) => ({
@@ -126,6 +172,49 @@ export default function EditCamera() {
         <p style={{ color: "white", marginTop: 30 }}>
           {loadError || "No hay cámaras disponibles"}
         </p>
+      </div>
+    );
+
+  if (!verified)
+    return (
+      <div className="edit-container">
+        <button className="edit-back" onClick={() => navigate("/")}>
+          <FaArrowLeft size={14} style={{ marginRight: 6 }} />
+          Volver
+        </button>
+
+        <h1 className="edit-title">Acceso restringido</h1>
+        <p className="edit-subtitle">
+          Ingresa el PIN de administrador para editar las cámaras.
+        </p>
+
+        <div className="edit-card">
+          <label className="edit-label" htmlFor="edit-pin">
+            PIN de administrador
+          </label>
+          <input
+            id="edit-pin"
+            className="edit-input"
+            type="password"
+            value={pin}
+            onChange={(e) => setPin(e.target.value)}
+            placeholder="PIN de administrador"
+          />
+
+          {pinStatus === "error" && (
+            <p className="edit-msg edit-error">{pinMsg}</p>
+          )}
+
+          <div className="edit-actions">
+            <button
+              className="edit-save"
+              onClick={verificarPin}
+              disabled={pinStatus === "verifying"}
+            >
+              {pinStatus === "verifying" ? "Verificando..." : "Entrar"}
+            </button>
+          </div>
+        </div>
       </div>
     );
 
