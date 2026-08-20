@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./CameraGrid.css";
-import { FaCamera, FaCog } from "react-icons/fa";
+import { FaCamera, FaCog, FaPlus } from "react-icons/fa";
 import ShareModal from "./components/ShareModal";
+import RegisterModal from "./components/RegisterModal";
 import proyectos from "./proyectos";
 import { API_URL } from "./config";
 
@@ -16,6 +17,9 @@ export default function CameraGrid({ onSelectCamera }) {
   // Modal para compartir
   const [showShare, setShowShare] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
+
+  // Modal para registrar cámara
+  const [showRegister, setShowRegister] = useState(false);
 
   /* ============================================================
       Cargar cámaras + información guardada en el backend
@@ -112,6 +116,20 @@ export default function CameraGrid({ onSelectCamera }) {
         Editar nombres y descripciones
       </button>
 
+      <button
+        className="camera-edit"
+        style={{
+          maxWidth: 320,
+          margin: "0 auto 20px",
+          display: "block",
+          background: "linear-gradient(135deg, #15803d, #22c55e)",
+        }}
+        onClick={() => setShowRegister(true)}
+      >
+        <FaPlus style={{ marginRight: "6px" }} />
+        Registrar nueva cámara
+      </button>
+
       <div className="camera-grid">
         {cameras.map((cam) => {
           const { name, desc } = getInfo(cam);
@@ -167,6 +185,14 @@ export default function CameraGrid({ onSelectCamera }) {
 
       {showShare && (
         <ShareModal open={showShare} url={shareUrl} onClose={() => setShowShare(false)} />
+      )}
+
+      {showRegister && (
+        <RegisterModal
+          open={showRegister}
+          onClose={() => setShowRegister(false)}
+          onSuccess={load}
+        />
       )}
     </>
   );
